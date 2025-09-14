@@ -1,0 +1,12 @@
+**/target
+**/.env*
+**/.venv*
+**/venv*
+.directory
+.kilocodeignore
+/.vscode
+/src/main.rs
+/helpers
+/FranBarInstance
+__pycache__/
+*.py[cod]
