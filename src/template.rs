@@ -425,4 +425,53 @@ mod tests {
         assert_eq!(status_param, "");
         assert_eq!(result, "Rust IPC client: Hello! 123");
     }
+
+    #[test]
+    fn test_template_404() {
+        skip_if_server_unavailable();
+
+        let schema = json!({
+            "data": {
+                "text": "Hello!",
+                "number": 123
+            }
+        });
+
+        let mut template = NeutralIpcTemplate::from_src_value("Rust IPC client: {:exit; 404 :}", schema).unwrap();
+        let result = template.render().unwrap();
+        let status_code = template.get_status_code();
+        let status_text = template.get_status_text();
+        let status_param = template.get_status_param();
+
+        assert!(!template.has_error());
+        assert_eq!(status_code, "404");
+        assert_eq!(status_text, "Not Found");
+        assert_eq!(status_param, "");
+        assert_eq!(result, "404 Not Found");
+    }
+
+    #[test]
+    fn test_template_redirect() {
+        skip_if_server_unavailable();
+
+        let schema = json!({
+            "data": {
+                "text": "Hello!",
+                "number": 123
+            }
+        });
+
+        let mut template = NeutralIpcTemplate::from_src_value("Rust IPC client: {:redirect; 301 >> https://crates.io/crates/neutralts :}", schema).unwrap();
+        let result = template.render().unwrap();
+        let status_code = template.get_status_code();
+        let status_text = template.get_status_text();
+        let status_param = template.get_status_param();
+
+        assert!(!template.has_error());
+        assert_eq!(status_code, "301");
+        assert_eq!(status_text, "Moved Permanently");
+        assert_eq!(status_param, "https://crates.io/crates/neutralts");
+        assert_eq!(result, "301 Moved Permanently\nhttps://crates.io/crates/neutralts");
+    }
+
 }
