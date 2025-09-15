@@ -60,11 +60,12 @@ impl NeutralIpcClient {
     /// Start the IPC communication with the Neutral server.
     ///
     /// This method:
-    /// 1. Establishes a TCP connection to the configured server
-    /// 2. Sets read/write timeouts based on configuration
-    /// 3. Encodes and sends the request record
-    /// 4. Reads and decodes the response
-    /// 5. Stores the parsed result
+    /// 1. Loads configuration for host, port, timeout, and buffer size
+    /// 2. Establishes a TCP connection to the configured server
+    /// 3. Sets read/write timeouts based on configuration
+    /// 4. Encodes and sends the request record
+    /// 5. Reads and decodes the response
+    /// 6. Stores the parsed result
     ///
     /// # Returns
     ///
@@ -161,7 +162,7 @@ impl NeutralIpcClient {
 /// Check if the Neutral server is available and responding.
 ///
 /// This function performs a lightweight availability check by:
-/// 1. Attempting to connect to the server
+/// 1. Attempting to connect to the server with a 1-second timeout
 /// 2. Sending a minimal valid request
 /// 3. Reading the response header to verify the server is responsive
 ///

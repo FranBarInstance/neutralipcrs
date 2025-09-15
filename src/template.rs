@@ -113,7 +113,7 @@ impl NeutralIpcTemplate {
         let schema_str = if schema.is_string() {
             schema.as_str().unwrap().to_string()
         } else {
-            serde_json::to_string(&schema).unwrap()
+            serde_json::to_string(&schema)?
         };
 
         Ok(Self {
@@ -131,7 +131,7 @@ impl NeutralIpcTemplate {
     /// 1. Creates an IPC client with the current template and schema
     /// 2. Sends the request to the Neutral server
     /// 3. Processes the response and extracts the rendered content
-    /// 4. Stores the complete result for later inspection
+    /// 4. Stores the complete result in the `result` field for later inspection
     ///
     /// # Returns
     ///
@@ -281,7 +281,7 @@ impl NeutralIpcTemplate {
     ///
     /// # Returns
     ///
-    /// The status code as `i64` from the JSON, or `0` if not present or if
+    /// The status code as `&str` from the JSON, or an empty string if not present or if
     /// any error occurs during extraction.
     pub fn get_status_code(&self) -> &str {
         self.result.get("result")

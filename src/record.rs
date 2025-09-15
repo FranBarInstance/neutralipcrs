@@ -42,7 +42,7 @@ impl NeutralIpcRecord {
     /// # Returns
     ///
     /// A `HashMap` containing the decoded header fields:
-    /// - `reserved`: Reserved field (should always be 0)
+    /// - `reserved`: Reserved field read from the header
     /// - `control`: Control code for the operation
     /// - `format-1`: Format identifier for the first content block
     /// - `length-1`: Length of the first content block in bytes
@@ -142,11 +142,11 @@ impl NeutralIpcRecord {
     /// # Returns
     ///
     /// A `HashMap` containing the complete decoded record including:
-    /// - `reserved`: Reserved field (should always be 0)
-    /// - `control`: Control code for the operation
-    /// - `format-1`: Format identifier for the first content block
+    /// - `reserved`: Reserved field (hardcoded to the RESERVED constant)
+    /// - `control`: Control code read from the header
+    /// - `format-1`: Format identifier read from the header
     /// - `content-1`: The first content block
-    /// - `format-2`: Format identifier for the second content block
+    /// - `format-2`: Format identifier read from the header
     /// - `content-2`: The second content block
     ///
     /// # Errors
