@@ -25,8 +25,12 @@ use crate::error::{NeutralIpcError, Result};
 /// use serde_json::json;
 ///
 /// // Create template from source code
-/// let schema = json!({"name": "World"});
-/// let mut template = NeutralIpcTemplate::from_src_value("Hello {:;name:}!", schema).unwrap();
+/// let schema = json!({
+///     "data": {
+///         "text": "World"
+///     }
+/// });
+/// let mut template = NeutralIpcTemplate::from_src_value("Hello {:;text:}!", schema).unwrap();
 /// let result = template.render().unwrap();
 /// println!("{}", result); // Output: "Hello World!"
 /// ```
