@@ -197,10 +197,7 @@ pub fn is_server_available() -> bool {
             match stream.write_all(&minimal_request) {
                 Ok(_) => {
                     let mut header_buffer = [0u8; HEADER_LEN];
-                    match stream.read_exact(&mut header_buffer) {
-                        Ok(_) => true,  // Server OK
-                        Err(_) => false // Server KO
-                    }
+                    stream.read_exact(&mut header_buffer).is_ok()
                 },
                 Err(_) => false
             }
