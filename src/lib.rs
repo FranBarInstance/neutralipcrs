@@ -12,7 +12,7 @@
 //! use neutralipcrs::{NeutralIpcTemplate, NeutralIpcConfig};
 //! use serde_json::json;
 //!
-//! let schema = json!({"name": "World"});
+//! let schema = json!({"data": {"name": "World"}});
 //! let mut template = NeutralIpcTemplate::from_src_value("Hello {:;name:}!", schema).unwrap();
 //! let result = template.render().unwrap();
 //! println!("{}", result); // Output: "Hello World!"

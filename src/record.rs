@@ -5,19 +5,19 @@
 
 
 // ============================================
-// Neutral IPC record version 0 (draft version)
+// Neutral IPC record version 0 specification
 // ============================================
 //
-// HEADER:
+// HEADER FORMAT (12 bytes total):
 //
-// \x00              // reserved
-// \x00              // control (action/status) (10 = parse template)
-// \x00              // content-format 1 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary)
-// \x00\x00\x00\x00  // content-length 1 big endian byte order
-// \x00              // content-format 2 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary)
-// \x00\x00\x00\x00  // content-length 2 big endian byte order (can be zero)
+// Byte 0: \x00                  // reserved
+// Byte 1: \x00                  // control (action/status) (10 = parse template)
+// Byte 2: \x00                  // content-format 1 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary)
+// Bytes 3-6: \x00\x00\x00\x00   // content-length 1 big endian byte order
+// Byte 7: \x00                  // content-format 2 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary)
+// Bytes 8-11: \x00\x00\x00\x00  // content-length 2 big endian byte order (can be zero)
 //
-// All text utf8
+// All text content must be UTF-8 encoded.
 
 use serde_json::Value;
 use std::collections::HashMap;

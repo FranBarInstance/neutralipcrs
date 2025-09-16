@@ -87,51 +87,95 @@ impl NeutralIpcConfig {
     }
 
 
-    /// Get configured host address
+    /// Get the configured host address
+    ///
+    /// # Returns
+    ///
+    /// The host address as a String (default: "127.0.0.1")
     pub fn get_host(&self) -> String {
         self.host.clone()
     }
 
-    /// Get configured port number
+    /// Get the configured port number
+    ///
+    /// # Returns
+    ///
+    /// The port number (default: 4273)
     pub fn get_port(&self) -> u16 {
         self.port
     }
 
-    /// Get configured timeout value
+    /// Get the configured timeout value
+    ///
+    /// # Returns
+    ///
+    /// The timeout in seconds (default: 10)
     pub fn get_timeout(&self) -> u16 {
         self.timeout
     }
 
-    /// Get configured buffer size
+    /// Get the configured buffer size
+    ///
+    /// # Returns
+    ///
+    /// The buffer size in bytes (default: 8192)
     pub fn get_buffer_size(&self) -> usize {
         self.buffer_size
     }
 
-    /// Get configuration file path
+    /// Get the configuration file path
+    ///
+    /// # Returns
+    ///
+    /// The path to the configuration file (default: "/etc/neutral-ipc-cfg.json")
     pub fn get_config_file(&self) -> String {
         self.config_file.clone()
     }
     /// Set the host address
+    ///
+    /// # Arguments
+    ///
+    /// * `host` - The host address to set
     pub fn set_host(&mut self, host: String) {
         self.host = host;
     }
 
     /// Set the port number
+    ///
+    /// # Arguments
+    ///
+    /// * `port` - The port number to set
     pub fn set_port(&mut self, port: u16) {
         self.port = port;
     }
 
     /// Set the timeout value
+    ///
+    /// # Arguments
+    ///
+    /// * `timeout` - The timeout in seconds to set
     pub fn set_timeout(&mut self, timeout: u16) {
         self.timeout = timeout;
     }
 
     /// Set the buffer size
+    ///
+    /// # Arguments
+    ///
+    /// * `buffer_size` - The buffer size in bytes to set
     pub fn set_buffer_size(&mut self, buffer_size: usize) {
         self.buffer_size = buffer_size;
     }
 
     /// Set the configuration file path
+    ///
+    /// # Arguments
+    ///
+    /// * `config_file` - The path to the configuration file to set
+    ///
+    /// # Note
+    ///
+    /// This method automatically reloads configuration from the new file after setting the path.
     pub fn set_config_file(&mut self, config_file: String) {
         self.config_file = config_file;
         // Automatically reload from the new config file

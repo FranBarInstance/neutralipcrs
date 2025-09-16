@@ -21,10 +21,9 @@ use crate::error::{NeutralIpcError, Result};
 /// # Examples
 ///
 /// ```no_run
-/// use neutralipcrs::{NeutralIpcTemplate, NeutralIpcConfig};
+/// use neutralipcrs::NeutralIpcTemplate;
 /// use serde_json::json;
 ///
-/// // Create template from source code
 /// let schema = json!({
 ///     "data": {
 ///         "text": "World"
@@ -152,10 +151,16 @@ impl NeutralIpcTemplate {
     /// use neutralipcrs::NeutralIpcTemplate;
     /// use serde_json::json;
     ///
-    /// let schema = json!({"user": {"name": "Alice"}});
-    /// let mut template = NeutralIpcTemplate::from_src_value("Hello {:;user.name:}!", schema).unwrap();
+    /// let schema = json!({
+    ///     "data": {
+    ///         "text": "World"
+    ///     }
+    /// });
+    ///
+    /// let mut template = NeutralIpcTemplate::from_src_value("Hello {:;text:}!", schema).unwrap();
     /// let result = template.render().unwrap();
-    /// assert_eq!(result, "Hello Alice!");
+    ///
+    /// assert_eq!(result, "Hello World!");
     /// ```
     pub fn render(&mut self) -> Result<String> {
         let mut client = NeutralIpcClient::new(
@@ -236,8 +241,8 @@ impl NeutralIpcTemplate {
     /// use serde_json::json;
     ///
     /// let mut template = NeutralIpcTemplate::new().unwrap();
-    /// template.merge_schema(json!({"base": {"value": 1}})).unwrap();
-    /// template.merge_schema(json!({"base": {"extra": 2}})).unwrap();
+    /// template.merge_schema(json!({"data": {"value": 1}})).unwrap();
+    /// template.merge_schema(json!({"data": {"extra": 2}})).unwrap();
     /// // Schema now contains: {"base": {"value": 1, "extra": 2}}
     /// ```
     pub fn merge_schema(&mut self, schema: Value) -> Result<()> {
