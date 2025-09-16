@@ -30,8 +30,10 @@ use crate::error::{NeutralIpcError, Result};
 ///         "text": "World"
 ///     }
 /// });
+///
 /// let mut template = NeutralIpcTemplate::from_src_value("Hello {:;text:}!", schema).unwrap();
 /// let result = template.render().unwrap();
+///
 /// println!("{}", result); // Output: "Hello World!"
 /// ```
 pub struct NeutralIpcTemplate {

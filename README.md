@@ -43,12 +43,12 @@ let status_param: &str = template.get_status_param();
 Neutral TS template engine
 --------------------------
 
-- [Rust docs](https://docs.rs/neutralts/latest/neutralts/)
+- [Rust docs](https://docs.rs/neutralipcrs/latest)
+- [Rust IPC Client Crate](https://crates.io/crates/neutralipcrs)
 - [Template docs](https://franbarinstance.github.io/neutralts-docs/docs/neutralts/doc/)
 - [IPC server](https://github.com/FranBarInstance/neutral-ipc/releases)
 - [IPC clients](https://github.com/FranBarInstance/neutral-ipc/tree/master/clients)
 - [Repository](https://github.com/FranBarInstance/neutralts)
 - [Crate](https://crates.io/crates/neutralts)
-- [IPC Client Crate](https://crates.io/crates/neutralipcrs)
 - [PYPI Package](https://pypi.org/project/neutraltemplate/)
 - [Examples](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples)
