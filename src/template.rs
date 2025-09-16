@@ -433,6 +433,38 @@ mod tests {
         assert_eq!(result, "Rust IPC client: Hello! 123");
     }
 
+
+    #[test]
+    fn test_template_merge_schema() {
+        skip_if_server_unavailable();
+
+        let schema = json!({
+            "data": {
+                "text": "Hello!",
+                "number": 123
+            }
+        });
+
+        let schema_merge = json!({
+            "data": {
+                "text": "Hello! (merged)"
+            }
+        });
+
+        let mut template = NeutralIpcTemplate::from_src_value("Rust IPC client: {:;text:} {:;number:}", schema).unwrap();
+        let _ = template.merge_schema(schema_merge).unwrap();
+        let result = template.render().unwrap();
+        let status_code = template.get_status_code();
+        let status_text = template.get_status_text();
+        let status_param = template.get_status_param();
+
+        assert!(!template.has_error());
+        assert_eq!(status_code, "200");
+        assert_eq!(status_text, "OK");
+        assert_eq!(status_param, "");
+        assert_eq!(result, "Rust IPC client: Hello! (merged) 123");
+    }
+
     #[test]
     fn test_template_404() {
         skip_if_server_unavailable();
