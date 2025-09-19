@@ -23,14 +23,6 @@
 //! println!("{}", result); // Output: "Hello World!"
 //! ```
 //!
-//! # Features
-//!
-//! - Template processing via IPC communication
-//! - Support for both file-based and source-based templates
-//! - JSON schema validation and merging
-//! - Configurable connection settings
-//! - Error handling with detailed error types
-//!
 //! # Configuration
 //!
 //! The client reads the server configuration from `/etc/neutral-ipc-cfg.json` to
