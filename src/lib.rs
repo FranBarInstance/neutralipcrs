@@ -7,14 +7,19 @@
 //!
 //! # Examples
 //!
-//! Basic template rendering:
 //! ```no_run
-//! use neutralipcrs::{NeutralIpcTemplate, NeutralIpcConfig};
+//! use neutralipcrs::NeutralIpcTemplate;
 //! use serde_json::json;
 //!
-//! let schema = json!({"data": {"name": "World"}});
-//! let mut template = NeutralIpcTemplate::from_src_value("Hello {:;name:}!", schema).unwrap();
+//! let schema = json!({
+//!     "data": {
+//!         "text": "World"
+//!     }
+//! });
+//!
+//! let mut template = NeutralIpcTemplate::from_src_value("Hello {:;text:}!", schema).unwrap();
 //! let result = template.render().unwrap();
+//!
 //! println!("{}", result); // Output: "Hello World!"
 //! ```
 //!
