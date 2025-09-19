@@ -33,8 +33,8 @@
 //!
 //! # Configuration
 //!
-//! The client can be configured via `/etc/neutral-ipc-cfg.json` or uses
-//! sensible defaults (localhost:4273).
+//! The client reads the server configuration from `/etc/neutral-ipc-cfg.json` to
+//! determine connection settings (host and port).
 
 
 pub mod config;
