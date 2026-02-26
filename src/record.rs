@@ -12,9 +12,9 @@
 //
 // Byte 0: \x00                  // reserved
 // Byte 1: \x00                  // control (action/status) (10 = parse template)
-// Byte 2: \x00                  // content-format 1 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary)
+// Byte 2: \x00                  // content-format 1 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary, 50 = MsgPack)
 // Bytes 3-6: \x00\x00\x00\x00   // content-length 1 big endian byte order
-// Byte 7: \x00                  // content-format 2 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary)
+// Byte 7: \x00                  // content-format 2 (10 = JSON, 20 = file path, 30 = plaintext, 40 = binary, 50 = MsgPack)
 // Bytes 8-11: \x00\x00\x00\x00  // content-length 2 big endian byte order (can be zero)
 //
 // All text content must be UTF-8 encoded.
@@ -112,16 +112,16 @@ impl NeutralIpcRecord {
     ///
     /// * `control` - Control code for the operation
     /// * `format1` - Format identifier for the first content block
-    /// * `content1` - Content for the first block as a string
+    /// * `content1` - Content for the first block as bytes
     /// * `format2` - Format identifier for the second content block
-    /// * `content2` - Content for the second block as a string
+    /// * `content2` - Content for the second block as bytes
     ///
     /// # Returns
     ///
     /// A `Vec<u8>` containing the complete record with header and both content blocks.
-    pub(crate) fn encode_record(control: u8, format1: u8, content1: &str, format2: u8, content2: &str) -> Vec<u8> {
-        let content1_bytes = content1.as_bytes();
-        let content2_bytes = content2.as_bytes();
+    pub(crate) fn encode_record(control: u8, format1: u8, content1: &[u8], format2: u8, content2: &[u8]) -> Vec<u8> {
+        let content1_bytes = content1;
+        let content2_bytes = content2;
         let length1 = content1_bytes.len() as u32;
         let length2 = content2_bytes.len() as u32;
 
@@ -164,5 +164,61 @@ impl NeutralIpcRecord {
         record.insert("content-2".to_string(), Value::String(content2.to_string()));
 
         Ok(record)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn test_encode_record_with_msgpack_content_sets_lengths_and_formats() {
+        let schema = json!({
+            "data": {
+                "text": "Hello",
+                "number": 123
+            }
+        });
+        let content1 = rmp_serde::to_vec(&schema).unwrap();
+        let content2 = b"Rust IPC client: {:;text:} {:;number:}";
+
+        let record = NeutralIpcRecord::encode_record(
+            CTRL_PARSE_TEMPLATE,
+            CONTENT_MSGPACK,
+            &content1,
+            CONTENT_TEXT,
+            content2,
+        );
+
+        assert_eq!(record.len(), HEADER_LEN + content1.len() + content2.len());
+        assert_eq!(record[0], RESERVED);
+        assert_eq!(record[1], CTRL_PARSE_TEMPLATE);
+        assert_eq!(record[2], CONTENT_MSGPACK);
+        assert_eq!(record[7], CONTENT_TEXT);
+
+        let len1 = u32::from_be_bytes([record[3], record[4], record[5], record[6]]) as usize;
+        let len2 = u32::from_be_bytes([record[8], record[9], record[10], record[11]]) as usize;
+        assert_eq!(len1, content1.len());
+        assert_eq!(len2, content2.len());
+        assert_eq!(&record[HEADER_LEN..HEADER_LEN + content1.len()], content1.as_slice());
+        assert_eq!(&record[HEADER_LEN + content1.len()..], content2);
+    }
+
+    #[test]
+    fn test_decode_header_reads_msgpack_format() {
+        let header = NeutralIpcRecord::encode_header(
+            CTRL_PARSE_TEMPLATE,
+            CONTENT_MSGPACK,
+            42,
+            CONTENT_TEXT,
+            8,
+        );
+
+        let decoded = NeutralIpcRecord::decode_header(&header).unwrap();
+        assert_eq!(decoded.get("format-1").and_then(|v| v.as_u64()), Some(CONTENT_MSGPACK as u64));
+        assert_eq!(decoded.get("length-1").and_then(|v| v.as_u64()), Some(42));
+        assert_eq!(decoded.get("format-2").and_then(|v| v.as_u64()), Some(CONTENT_TEXT as u64));
+        assert_eq!(decoded.get("length-2").and_then(|v| v.as_u64()), Some(8));
     }
 }

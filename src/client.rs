@@ -26,8 +26,8 @@ pub(crate) struct NeutralIpcClient {
     control: u8,
     /// Format identifier for the first content field
     format1: u8,
-    /// First content field (typically JSON schema)
-    content1: String,
+    /// First content field (JSON or MsgPack schema)
+    content1: Vec<u8>,
     /// Format identifier for the second content field
     format2: u8,
     /// Second content field (typically template content)
@@ -46,11 +46,11 @@ impl NeutralIpcClient {
     /// * `content1` - First content field, typically a JSON schema
     /// * `format2` - Format identifier for the second content field (e.g., `CONTENT_TEXT`)
     /// * `content2` - Second content field, typically template content
-    pub(crate) fn new(control: u8, format1: u8, content1: &str, format2: u8, content2: &str) -> Self {
+    pub(crate) fn new(control: u8, format1: u8, content1: &[u8], format2: u8, content2: &str) -> Self {
         Self {
             control,
             format1,
-            content1: content1.to_string(),
+            content1: content1.to_vec(),
             format2,
             content2: content2.to_string(),
             result: HashMap::new(),
@@ -90,7 +90,11 @@ impl NeutralIpcClient {
         stream.set_write_timeout(Some(Duration::from_secs(timeout as u64)))?;
 
         let request = NeutralIpcRecord::encode_record(
-            self.control, self.format1, &self.content1, self.format2, &self.content2
+            self.control,
+            self.format1,
+            &self.content1,
+            self.format2,
+            self.content2.as_bytes(),
         );
         stream.write_all(&request)?;
 
@@ -187,9 +191,9 @@ pub fn is_server_available() -> bool {
             let minimal_request = NeutralIpcRecord::encode_record(
                 CTRL_PARSE_TEMPLATE,
                 CONTENT_JSON,
-                "{}",
+                b"{}",
                 CONTENT_TEXT,
-                ""
+                b""
             );
 
             stream.set_read_timeout(Some(std::time::Duration::from_secs(1))).ok();

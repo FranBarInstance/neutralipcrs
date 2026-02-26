@@ -31,6 +31,10 @@ pub enum NeutralIpcError {
     InvalidUtf8,
     /// JSON parsing or serialization error.
     Json(serde_json::Error),
+    /// MessagePack serialization error.
+    MsgPackEncode(rmp_serde::encode::Error),
+    /// MessagePack deserialization error.
+    MsgPackDecode(rmp_serde::decode::Error),
 }
 
 impl fmt::Display for NeutralIpcError {
@@ -42,6 +46,8 @@ impl fmt::Display for NeutralIpcError {
             NeutralIpcError::ConnectionClosed => write!(f, "Connection closed unexpectedly"),
             NeutralIpcError::InvalidUtf8 => write!(f, "Invalid UTF-8 encoding in response"),
             NeutralIpcError::Json(err) => write!(f, "JSON error: {}", err),
+            NeutralIpcError::MsgPackEncode(err) => write!(f, "MsgPack encode error: {}", err),
+            NeutralIpcError::MsgPackDecode(err) => write!(f, "MsgPack decode error: {}", err),
         }
     }
 }
@@ -51,6 +57,8 @@ impl std::error::Error for NeutralIpcError {
         match self {
             NeutralIpcError::Io(err) => Some(err),
             NeutralIpcError::Json(err) => Some(err),
+            NeutralIpcError::MsgPackEncode(err) => Some(err),
+            NeutralIpcError::MsgPackDecode(err) => Some(err),
             _ => None,
         }
     }
@@ -73,5 +81,17 @@ impl From<io::Error> for NeutralIpcError {
 impl From<serde_json::Error> for NeutralIpcError {
     fn from(err: serde_json::Error) -> Self {
         NeutralIpcError::Json(err)
+    }
+}
+
+impl From<rmp_serde::encode::Error> for NeutralIpcError {
+    fn from(err: rmp_serde::encode::Error) -> Self {
+        NeutralIpcError::MsgPackEncode(err)
+    }
+}
+
+impl From<rmp_serde::decode::Error> for NeutralIpcError {
+    fn from(err: rmp_serde::decode::Error) -> Self {
+        NeutralIpcError::MsgPackDecode(err)
     }
 }

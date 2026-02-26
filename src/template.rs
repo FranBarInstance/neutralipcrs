@@ -14,7 +14,7 @@ use crate::error::{NeutralIpcError, Result};
 ///
 /// This struct provides a high-level API for:
 /// - Template setup (from file path or source code)
-/// - JSON schema management and merging
+/// - JSON/MsgPack schema management and merging
 /// - Template rendering via IPC communication
 /// - Result processing and error handling
 ///
@@ -40,8 +40,10 @@ pub struct NeutralIpcTemplate {
     template: String,
     /// Content type identifier (CONTENT_PATH or CONTENT_TEXT)
     tpl_type: u8,
-    /// JSON schema as a string
-    schema: String,
+    /// Schema format identifier (CONTENT_JSON or CONTENT_MSGPACK)
+    schema_type: u8,
+    /// Schema bytes (JSON text bytes or MsgPack bytes)
+    schema: Vec<u8>,
     /// Parsed result from the last rendering operation
     pub(crate) result: HashMap<String, Value>,
 }
@@ -62,7 +64,8 @@ impl NeutralIpcTemplate {
         Ok(Self {
             template: "".to_string(),
             tpl_type: CONTENT_PATH,
-            schema: "{}".to_string(),
+            schema_type: CONTENT_JSON,
+            schema: b"{}".to_vec(),
             result: HashMap::new(),
         })
     }
@@ -91,7 +94,8 @@ impl NeutralIpcTemplate {
         Ok(Self {
             template: template.to_string(),
             tpl_type: CONTENT_PATH,
-            schema: schema_str,
+            schema_type: CONTENT_JSON,
+            schema: schema_str.into_bytes(),
             result: HashMap::new(),
         })
     }
@@ -120,7 +124,40 @@ impl NeutralIpcTemplate {
         Ok(Self {
             template: template.to_string(),
             tpl_type: CONTENT_TEXT,
-            schema: schema_str,
+            schema_type: CONTENT_JSON,
+            schema: schema_str.into_bytes(),
+            result: HashMap::new(),
+        })
+    }
+
+    /// Create a template from a file path and MsgPack schema bytes.
+    ///
+    /// # Arguments
+    ///
+    /// * `template` - File path to the template
+    /// * `schema` - MsgPack-encoded schema bytes
+    pub fn from_file_msgpack(template: &str, schema: &[u8]) -> Result<Self> {
+        Ok(Self {
+            template: template.to_string(),
+            tpl_type: CONTENT_PATH,
+            schema_type: CONTENT_MSGPACK,
+            schema: schema.to_vec(),
+            result: HashMap::new(),
+        })
+    }
+
+    /// Create a template from source code and MsgPack schema bytes.
+    ///
+    /// # Arguments
+    ///
+    /// * `template` - Template source code
+    /// * `schema` - MsgPack-encoded schema bytes
+    pub fn from_src_msgpack(template: &str, schema: &[u8]) -> Result<Self> {
+        Ok(Self {
+            template: template.to_string(),
+            tpl_type: CONTENT_TEXT,
+            schema_type: CONTENT_MSGPACK,
+            schema: schema.to_vec(),
             result: HashMap::new(),
         })
     }
@@ -165,8 +202,8 @@ impl NeutralIpcTemplate {
     pub fn render(&mut self) -> Result<String> {
         let mut client = NeutralIpcClient::new(
             CTRL_PARSE_TEMPLATE,
-            CONTENT_JSON,
-            &self.schema,
+            self.schema_type,
+            self.schema.as_slice(),
             self.tpl_type,
             &self.template
         );
@@ -246,7 +283,10 @@ impl NeutralIpcTemplate {
     /// // Schema now contains: {"base": {"value": 1, "extra": 2}}
     /// ```
     pub fn merge_schema(&mut self, schema: Value) -> Result<()> {
-        let current_schema: Value = serde_json::from_str(&self.schema)?;
+        let current_schema: Value = match self.schema_type {
+            CONTENT_MSGPACK => rmp_serde::from_slice(&self.schema)?,
+            _ => serde_json::from_slice(&self.schema)?,
+        };
         let new_schema = if schema.is_string() {
             serde_json::from_str(schema.as_str().unwrap())?
         } else {
@@ -254,8 +294,19 @@ impl NeutralIpcTemplate {
         };
 
         let merged = Self::deep_merge(current_schema, new_schema);
-        self.schema = serde_json::to_string(&merged)?;
+        self.schema = match self.schema_type {
+            CONTENT_MSGPACK => rmp_serde::to_vec(&merged)?,
+            _ => serde_json::to_vec(&merged)?,
+        };
         Ok(())
+    }
+
+    /// Replace the current schema with MsgPack bytes.
+    ///
+    /// This method switches the schema format to `CONTENT_MSGPACK`.
+    pub fn set_schema_msgpack(&mut self, schema: &[u8]) {
+        self.schema_type = CONTENT_MSGPACK;
+        self.schema = schema.to_vec();
     }
 
     /// Check if the last rendering operation resulted in an error.
@@ -368,6 +419,7 @@ impl NeutralIpcTemplate {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rmp_serde::from_slice;
     use serde_json::json;
     use crate::client::is_server_available;
 
@@ -511,6 +563,37 @@ mod tests {
         assert_eq!(status_text, "Moved Permanently");
         assert_eq!(status_param, "https://crates.io/crates/neutralts");
         assert_eq!(result, "301 Moved Permanently\nhttps://crates.io/crates/neutralts");
+    }
+
+    #[test]
+    fn test_from_src_msgpack_and_merge_schema() {
+        let schema = json!({
+            "data": {
+                "text": "Hello!"
+            }
+        });
+        let msgpack = rmp_serde::to_vec(&schema).unwrap();
+
+        let mut template = NeutralIpcTemplate::from_src_msgpack("tpl", &msgpack).unwrap();
+        template.merge_schema(json!({"data": {"number": 123}})).unwrap();
+
+        assert_eq!(template.schema_type, CONTENT_MSGPACK);
+        let merged: Value = from_slice(&template.schema).unwrap();
+        assert_eq!(merged["data"]["text"], "Hello!");
+        assert_eq!(merged["data"]["number"], 123);
+    }
+
+    #[test]
+    fn test_set_schema_msgpack_switches_type() {
+        let schema = json!({"data": {"value": 1}});
+        let msgpack = rmp_serde::to_vec(&schema).unwrap();
+
+        let mut template = NeutralIpcTemplate::new().unwrap();
+        template.set_schema_msgpack(&msgpack);
+
+        assert_eq!(template.schema_type, CONTENT_MSGPACK);
+        let decoded: Value = from_slice(&template.schema).unwrap();
+        assert_eq!(decoded["data"]["value"], 1);
     }
 
 }

@@ -3,7 +3,7 @@
 //! This crate provides a Rust client for the Neutral template engine,
 //! which processes templates via Inter-Process Communication (IPC).
 //! The client communicates with a Neutral server to render templates
-//! with JSON data schemas.
+//! with JSON or MsgPack data schemas.
 //!
 //! # Examples
 //!
@@ -18,6 +18,23 @@
 //! });
 //!
 //! let mut template = NeutralIpcTemplate::from_src_value("Hello {:;text:}!", schema).unwrap();
+//! let result = template.render().unwrap();
+//!
+//! println!("{}", result); // Output: "Hello World!"
+//! ```
+//!
+//! ```no_run
+//! use neutralipcrs::NeutralIpcTemplate;
+//! use serde_json::json;
+//!
+//! let schema = json!({
+//!     "data": {
+//!         "text": "World"
+//!     }
+//! });
+//! let schema_msgpack = rmp_serde::to_vec(&schema).unwrap();
+//!
+//! let mut template = NeutralIpcTemplate::from_src_msgpack("Hello {:;text:}!", &schema_msgpack).unwrap();
 //! let result = template.render().unwrap();
 //!
 //! println!("{}", result); // Output: "Hello World!"

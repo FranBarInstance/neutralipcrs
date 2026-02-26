@@ -51,3 +51,8 @@ pub const CONTENT_TEXT: u8 = 30;
 ///
 /// This constant indicates that the payload contains binary data.
 pub const CONTENT_BIN: u8 = 40;
+
+/// Content type identifier for MsgPack data.
+///
+/// This constant indicates that the payload contains MessagePack-encoded data.
+pub const CONTENT_MSGPACK: u8 = 50;

@@ -11,7 +11,7 @@ The documentation of the **web template** engine is here: [template engine doc](
 Rust IPC use
 ------------
 
-```
+```rust
 use neutralipcrs::NeutralIpcTemplate;
 use serde_json::json;
 
@@ -21,7 +21,7 @@ let schema = json!({
     }
 });
 
-let template = Template::from_file_value("file.ntpl", schema).unwrap();
+let mut template = NeutralIpcTemplate::from_file_value("file.ntpl", schema).unwrap();
 let contents = template.render().unwrap();
 
 // e.g.: 200
@@ -34,6 +34,25 @@ let status_text: &str = template.get_status_text();
 let status_param: &str = template.get_status_param();
 
 // act accordingly at this point according to your framework
+```
+
+Rust IPC with MsgPack schema
+----------------------------
+
+```rust
+use neutralipcrs::NeutralIpcTemplate;
+use serde_json::json;
+
+let schema = json!({
+    "data": {
+        "hello": "Hello World"
+    }
+});
+let schema_msgpack = rmp_serde::to_vec(&schema).unwrap();
+
+let mut template = NeutralIpcTemplate::from_src_msgpack("Message: {:;hello:}", &schema_msgpack).unwrap();
+let contents = template.render().unwrap();
+assert_eq!(contents, "Message: Hello World");
 ```
 
 - Requires the IPC server: [Neutral TS IPC Server](https://github.com/FranBarInstance/neutral-ipc/releases)
