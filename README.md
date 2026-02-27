@@ -1,12 +1,17 @@
-
 Neutral TS Rust IPC Client
 ==========================
 
-Neutral TS is a **safe, modular, language-agnostic template engine** built in Rust. It works as a **native Rust library** or via **IPC** for other languages like Python and PHP. With Neutral TS you can reuse the **same template across multiple languages** with consistent results.
+**Neutral IPC Client** is a Rust library that provides a client for the [Neutral](https://github.com/FranBarInstance/neutralts) template engine via Inter-Process Communication (IPC). It allows you to render templates using a language-agnostic approach, communicating with a Neutral IPC server to process templates with JSON or MsgPack data schemas.
 
-Examples for [Rust](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples/rust), [Python](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples/python), [PHP](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples/php), [Node.js](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples/node) and [Go](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples/go) here: [download](https://github.com/FranBarInstance/neutralts-docs/releases). All PWA [examples](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples) use the same template: [Neutral templates](https://github.com/FranBarInstance/neutralts-docs/tree/master/examples/neutral).
+## Features
 
-The documentation of the **web template** engine is here: [template engine doc](https://franbarinstance.github.io/neutralts-docs/docs/neutralts/doc/) and **Rust** documentation here: [Rust doc](https://docs.rs/neutralts/latest/neutralts/).
+- **IPC Communication**: Connect to a Neutral template server via TCP
+- **Flexible Schema Support**: Use JSON or MsgPack data formats
+- **Template Sources**: Load templates from files or inline strings
+- **Schema Merging**: Incrementally build complex schemas with deep merge support
+- **Status Handling**: Retrieve status codes, messages, and parameters from rendered templates
+- **Configurable**: Customize connection settings (host, port, timeout, buffer size)
+- **Safe & Reliable**: Built with Rust's type safety and comprehensive error handling
 
 Rust IPC use
 ------------
